@@ -9,7 +9,7 @@ body{margin:0;display:flex;height:100vh;font-family:Helvetica,Arial,sans-serif;c
 .list{width:45%;min-width:350px;padding:20px;overflow-y:auto;box-shadow:inset -1px 0 0 #ddd;}
 .mapwrap{flex:1;min-width:320px;}
 #google-map-iframe{width:100%;height:100%;border:0;}
-.card{padding:10px 0;border-bottom:1px solid #eee;}
+.card{padding:10px 0;border-bottom:1px solid #eee; position: relative;} /* Added position:relative for delete btn */
 .card:hover{background:#f5f5f5;}
 .index{font-weight:bold;margin-right:4px;}
 .price{color:#28a745;font-weight:bold;margin-left:6px;}
@@ -21,27 +21,28 @@ a.restLink:hover { text-decoration: underline; }
 
 h2{margin:18px 0 6px;font-size:1.15em;border-bottom:1px solid #999;padding-bottom:4px}
 .filter{margin-bottom:12px;font-size:.9em;}
-.add-place-form {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    padding: 15px;
-    border-radius: 5px;
-    margin-bottom: 20px;
-}
+.add-place-form { background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
 .add-place-form h3 { margin: 0 0 10px; font-size: 1em; }
 .form-row { display: flex; gap: 10px; margin-bottom: 10px; }
 .form-row input, .form-row select { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-.form-row button {
-    padding: 8px 12px;
-    border: none;
-    background-color: #28a745;
-    color: white;
-    font-weight: bold;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
+.form-row button { padding: 8px 12px; border: none; background-color: #28a745; color: white; font-weight: bold; border-radius: 4px; cursor: pointer; transition: background-color 0.2s; }
 .form-row button:hover { background-color: #218838; }
+
+/* --- NEW DELETE BUTTON STYLE --- */
+.delete-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    color: #ccc;
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 5px;
+    transition: color 0.2s;
+}
+.delete-btn:hover { color: #e74c3c; /* Red hover color */ }
 
 /* --- STYLES FOR YOUR RATING & NOTES --- */
 .my-rating-container { display: flex; align-items: center; gap: 10px; margin-top: 5px; }
@@ -99,109 +100,98 @@ function initPage(){
 
 const HOME = { lat:40.746936, lon:-73.993135 };
 
-/* ---------- DATA (Includes restaurants and bars) ---------- */
-const data = [
-/* ---------- TOP TIER (10) ---------- */
-{idx:1,name:"Eleven Madison Park",lat:40.741673,lon:-73.987244,cat:"top",price:"$$$$",cuisine:"Modern American",url:"https://www.elevenmadisonpark.com", blurb:"Daniel Humm’s three-star icon pivoted to an all-plant menu without losing the sense of theater.", dish:"Must-order: the sunflower butter bread service.", rating:null, reviews:null, placeId:null},
-{idx:2,name:"Atomix",lat:40.744306,lon:-73.982806,cat:"top",price:"$$$$",cuisine:"Korean Tasting",url:"https://www.atomixnyc.com", blurb:"A 14-seat counter where each course is presented with a collectible card explaining Korean ingredients.", dish:"Must-order: abalone juk with seaweed butter.", rating:null, reviews:null, placeId:null},
-{idx:3,name:"COTE Korean Steakhouse",lat:40.741399,lon:-73.991100,cat:"top",price:"$$$$",cuisine:"Korean BBQ",url:"https://www.cotekoreansteakhouse.com", blurb:"The world’s only Michelin-starred K-BBQ marries dry-aged beef with a clubby cocktail bar.", dish:"Must-order: Butcher’s Feast (prime ribeye & marinated short rib).", rating:null, reviews:null, placeId:null},
-{idx:4,name:"Ai Fiori",lat:40.750060,lon:-73.983897,cat:"top",price:"$$$$",cuisine:"French-Italian",url:"https://www.aifiorinyc.com", blurb:"Chef Michael White’s Riviera-inspired pastas and seafood served from a marble grand staircase.", dish:"Must-order: lobster velouté with black-truffle gnocchetti.", rating:null, reviews:null, placeId:null},
-{idx:5,name:"Koloman",lat:40.745669,lon:-73.988094,cat:"top",price:"$$$$",cuisine:"Austro-French",url:"https://www.kolomanrestaurant.com", blurb:"Markus Glocker reinvents Viennese classics in an art-nouveau room inside the Ace Hotel.", dish:"Must-order: vanilla soufflé with elderflower crème-anglaise.", rating:null, reviews:null, placeId:null},
-{idx:6,name:"Gramercy Tavern",lat:40.738281,lon:-73.988126,cat:"top",price:"$$$$",cuisine:"New American",url:"https://www.gramercytavern.com", blurb:"Danny Meyer’s wood-beamed standby still defines warm service and seasonal cooking.", dish:"Must-order: smoked trout with horseradish & dill.", rating:null, reviews:null, placeId:null},
-{idx:7,name:"Rezdôra",lat:40.738395,lon:-73.988490,cat:"top",price:"$$$$",cuisine:"Emilia-Romagna Italian",url:"https://www.rezdora.nyc", blurb:"Hand-rolled pasta ritual from Osteria Francescana alumnus Stefano Secchi.", dish:"Must-order: grandma walking through forest mushroom pasta.", rating:null, reviews:null, placeId:null},
-{idx:8,name:"The Clocktower",lat:40.741579,lon:-73.987669,cat:"top",price:"$$$$",cuisine:"Modern British",url:"https://www.theclocktowernyc.com", blurb:"Jason Atherton’s mahogany dining rooms hide inside the Edition Hotel’s turn-of-the-century clocktower.", dish:"Must-order: beef Wellington for two.", rating:null, reviews:null, placeId:null},
-{idx:9,name:"Noda",lat:40.739266,lon:-73.993621,cat:"top",price:"$$$$",cuisine:"Edomae Sushi",url:"https://www.noda.nyc", blurb:"Eight seats, hinoki counter, 14-course omakase flown in from Toyosu Market daily.", dish:"Must-order: aged bluefin akami with shark-skin wasabi.", rating:null, reviews:null, placeId:null},
-{idx:10,name:"Gabriel Kreuther",lat:40.755224,lon:-73.982164,cat:"top",price:"$$$$",cuisine:"Alsatian French",url:"https://www.gknyc.com", blurb:"Stork murals and bacon bread introduce chef Kreuther’s luxe take on Alsace.", dish:"Must-order: sturgeon sauerkraut tart with caviar.", rating:null, reviews:null, placeId:null},
-{idx:11,name:"Shukette",lat:40.747180,lon:-74.000590,cat:"main",price:"$$",cuisine:"Middle Eastern",url:"https://www.shukettenyc.com", blurb:"Chef Ayesha Nurdjaja’s rowdy grill counter sends out blistered laffa and za’atar-dusted fries.", dish:"Must-order: Jaffa feast (whole fish, salatim, laffa).", rating:null, reviews:null, placeId:null},
-{idx:12,name:"Txikito",lat:40.747530,lon:-74.000370,cat:"main",price:"$$",cuisine:"Basque",url:"https://www.txikitonyc.com", blurb:"Tiny bar where pintxos arrive pinned with toothpicks and Spanish vermouth flows on tap.", dish:"Must-order: morcilla & egg ‘slider’ (Bikini Txistorra).", rating:null, reviews:null, placeId:null},
-{idx:13,name:"Cookshop",lat:40.745638,lon:-74.005669,cat:"main",price:"$$",cuisine:"Seasonal American",url:"https://www.cookshopny.com", blurb:"Locavore brunch magnet across from the High Line—solar panels power the kitchen.", dish:"Must-order: wood-fired shakshuka.", rating:null, reviews:null, placeId:null},
-{idx:14,name:"Hav & Mar",lat:40.751013,lon:-74.005780,cat:"main",price:"$$$",cuisine:"Afro-Nordic Seafood",url:"https://www.havandmar.com", blurb:"Marcus Samuelsson marries Ethiopian spice with Scandinavian technique.", dish:"Must-order: berbere-spiced whole branzino.", rating:null, reviews:null, placeId:null},
-{idx:15,name:"ABC Kitchen",lat:40.737750,lon:-73.989630,cat:"main",price:"$$$",cuisine:"Farm-to-Table",url:"https://www.abckitchennyc.com", blurb:"Jean-Georges’ original farm-to-table room lit by reclaimed chandeliers.", dish:"Must-order: roasted carrot & avocado salad.", rating:null, reviews:null, placeId:null},
-{idx:16,name:"La Pecora Bianca",lat:40.743784,lon:-73.989362,cat:"main",price:"$$",cuisine:"Italian",url:"https://www.lapecorabianca.com", blurb:"All-day spritzes and house-made rigatoni in a bright, tile-lined room.", dish:"Must-order: pesto gramigna with sausage.", rating:null, reviews:null, placeId:null},
-{idx:17,name:"L’Amico",lat:40.747174,lon:-73.989956,cat:"main",price:"$$$",cuisine:"Italian-American",url:"https://www.lamico.nyc", blurb:"Hotel Eventi’s hearth-fed pizzas and pastas by Laurent Tourondel.", dish:"Must-order: cacio-e-pepe focaccia.", rating:null, reviews:null, placeId:null},
-{idx:18,name:"Legacy Records",lat:40.754855,lon:-73.998472,cat:"main",price:"$$$",cuisine:"Italian",url:"https://www.legacyrecordsrestaurant.com", blurb:"Charlie Bird team’s swanky dining room tucked into a Hudson Yards condo tower.", dish:"Must-order: chicken liver agnolotti.", rating:null, reviews:null, placeId:null},
-{idx:19,name:"Ci Siamo",lat:40.753324,lon:-73.998977,cat:"main",price:"$$$",cuisine:"Live-Fire Italian",url:"https://www.cisiamonyc.com", blurb:"Hillary Sterling’s open-hearth kitchen perfumes the room with smoldering olive logs.", dish:"Must-order: focaccia di Recco with stracchino.", rating:null, reviews:null, placeId:null},
-{idx:20,name:"Kyma Flatiron",lat:40.739544,lon:-73.992612,cat:"main",price:"$$",cuisine:"Greek",url:"https://www.kymaflatiron.com", blurb:"White-washed Cycladic dining room turns out whole grilled lavraki and ouzo cocktails.", dish:"Must-order: saganaki cheese with Metaxa flambé.", rating:null, reviews:null, placeId:null},
-{idx:21,name:"Dim Sum Sam",lat:40.744850,lon:-73.995320,cat:"chinese",price:"$$",cuisine:"Dim Sum",url:"https://dimsumsam.com", blurb:"Counter-service baskets of steamed shrimp har-gow and rice rolls made to order.", dish:"Must-order: molten salted-egg yolk buns.", rating:null, reviews:null, placeId:null},
-{idx:22,name:"Hao Noodle",lat:40.741204,lon:-73.999196,cat:"chinese",price:"$$$",cuisine:"Chongqing Noodles",url:"https://www.haonoodle.com", blurb:"Floral china and silk lanterns set the stage for numbing-spicy beef noodles.", dish:"Must-order: grandma’s chicken soup noodles.", rating:null, reviews:null, placeId:null},
-{idx:23,name:"Xi’an Famous Foods",lat:40.740410,lon:-74.000620,cat:"chinese",price:"$$",cuisine:"Shaanxi",url:"https://xianfoods.com", blurb:"Hand-torn biang-biang ribbons slicked with cumin-lamb chili oil.", dish:"Must-order: spicy cumin lamb noodles.", rating:null, reviews:null, placeId:null},
-{idx:24,name:"Mala Project",lat:40.750588,lon:-73.993215,cat:"chinese",price:"$$",cuisine:"Dry-Pot Sichuan",url:"https://malaproject.nyc", blurb:"Build-your-own Sichuan dry pot with 50+ mix-ins, no broth required.", dish:"Must-order: lotus root & beef-tongue dry pot.", rating:null, reviews:null, placeId:null},
-{idx:25,name:"RedFarm",lat:40.744299,lon:-74.004110,cat:"chinese",price:"$$$",cuisine:"NYC Chinese-Fusion",url:"https://redfarmnyc.com", blurb:"Playful dim-sum like Pac-Man shrimp dumplings in a barn-chic room.", dish:"Must-order: Katz’s pastrami egg roll.", rating:null, reviews:null, placeId:null},
-{idx:26,name:"Junzi Kitchen",lat:40.748879,lon:-73.984060,cat:"chinese",price:"$$",cuisine:"Northern Chinese",url:"https://junzi.kitchen", blurb:"Fast-casual chun-bing wraps filled with cumin lamb and sweet potato noodles.", dish:"Must-order: jianbing-style scallion pancake.", rating:null, reviews:null, placeId:null},
-{idx:27,name:"Han Dynasty",lat:40.743949,lon:-73.983038,cat:"chinese",price:"$$",cuisine:"Sichuan",url:"https://handynasty.net", blurb:"Philadelphia import famed for its ‘dry pepper’ crispy wings.", dish:"Must-order: dan-dan noodles level-6 spice.", rating:null, reviews:null, placeId:null},
-{idx:28,name:"Spicy Village Express",lat:40.749176,lon:-73.996798,cat:"chinese",price:"$",cuisine:"Henan",url:"https://spicyvillagenyc.com", blurb:"Mini offshoot slings the legendary big-plate chicken over hand-pulled noodles.", dish:"Must-order: big plate chicken for two.", rating:null, reviews:null, placeId:null},
-{idx:29,name:"Noodle Q",lat:40.746515,lon:-74.001429,cat:"chinese",price:"$",cuisine:"Hand-Pulled Noodles",url:"#", blurb:"No-frills counter for Lanzhou-style beef noodle soup with ribbons as wide as belts.", dish:"Must-order: extra-wide noodles in clear broth.", rating:null, reviews:null, placeId:null},
-{idx:30,name:"Brooklyn Dumpling Shop",lat:40.741948,lon:-73.996261,cat:"chinese",price:"$",cuisine:"Automat Dumplings",url:"https://brooklyndumplingshop.com", blurb:"24-hour Automat serves cheeseburger and Philly cheese-steak dumplings from lockers.", dish:"Must-order: pastrami dumplings with mustard.", rating:null, reviews:null, placeId:null},
-{idx:31,name:"NY Pizza Suprema",lat:40.750580,lon:-73.994830,cat:"pizza",price:"$",cuisine:"Slice Joint",url:"https://nypizzasuprema.com", blurb:"50-year Penn Station slice legend—sauce first, cheese second.", dish:"Must-order: upside-down Sicilian slice.", rating:null, reviews:null, placeId:null},
-{idx:32,name:"Joe’s Pizza – 24th St",lat:40.744233,lon:-73.992495,cat:"pizza",price:"$",cuisine:"Classic NY",url:"https://www.joespizzanyc.com", blurb:"West Village icon’s Chelsea outpost keeps the foldable triangles flowing till 4 AM.", dish:"Must-order: plain cheese slice, extra crisp.", rating:null, reviews:null, placeId:null},
-{idx:33,name:"Lucali Slice",lat:40.748100,lon:-73.994600,cat:"pizza",price:"$$",cuisine:"Brick-Oven",url:"#", blurb:"Counter spin-off of Carroll Gardens cult favorite—same sweet basil sauce by the slice. (Reported Closed)", dish:"Must-order: pepperoni & hot honey.", rating:null, reviews:null, placeId:null},
-{idx:34,name:"Starita",lat:40.752321,lon:-73.991205,cat:"pizza",price:"$$",cuisine:"Neapolitan",url:"https://staritanapoli.com", blurb:"Legendary Naples pizzeria’s lightly fried montanara pies land in NoMad.", dish:"Must-order: Montanara Margherita (flash-fried crust).", rating:null, reviews:null, placeId:null},
-{idx:35,name:"Prince St Pizza Chelsea",lat:40.743108,lon:-74.000789,cat:"pizza",price:"$",cuisine:"Square Slice",url:"https://princestpizzanyc.com", blurb:"Soho’s spicy ‘roni cups migrate uptown—be prepared for a queue.", dish:"Must-order: Spicy Spring square slice.", rating:null, reviews:null, placeId:null},
-{idx:36,name:"Scarr’s Express",lat:40.743899,lon:-73.995600,cat:"pizza",price:"$",cuisine:"Whole-Wheat Slice",url:"https://scarrspizza.com", blurb:"Milled-in-house flour yields a 70s-style slice with better chew.", dish:"Must-order: plain slice; add Sicilian if hot.", rating:null, reviews:null, placeId:null},
-{idx:37,name:"Artichoke Basille’s",lat:40.748057,lon:-73.994428,cat:"pizza",price:"$",cuisine:"Late-Night",url:"https://artichokepizza.com", blurb:"Rich, creamy artichoke-spinach slice that eats like lasagna at 3 AM.", dish:"Must-order: artichoke slice, obviously.", rating:null, reviews:null, placeId:null},
-{idx:38,name:"Two Boots Flatiron",lat:40.740870,lon:-73.990350,cat:"pizza",price:"$",cuisine:"Cajun Slice",url:"https://twoboots.com", blurb:"Cornmeal crust and andouille toppings meet punk-rock decor.", dish:"Must-order: Bayou Beast slice.", rating:null, reviews:null, placeId:null},
-{idx:39,name:"Slice Joint",lat:40.749499,lon:-74.002300,cat:"pizza",price:"$",cuisine:"Thin Crust",url:"https://slicejointpizza.com", blurb:"Paper-thin squares cooked in blue-steel pans by a Roberta’s alum.", dish:"Must-order: sausage & fennel round slice.", rating:null, reviews:null, placeId:null},
-{idx:40,name:"Lombardi’s Chelsea",lat:40.747380,lon:-74.000540,cat:"pizza",price:"$$",cuisine:"Coal-Oven",url:"https://firstpizza.com", blurb:"Offshoot of America’s first licensed pizzeria uses the same coal-blistered crust. (Reported Closed)", dish:"Must-order: Margherita with fresh basil.", rating:null, reviews:null, placeId:null},
-{idx:41,name:"Black Seed Bagels",lat:40.744895,lon:-73.983598,cat:"bagels",price:"$",cuisine:"Montreal-NY",url:"https://blackseedbagels.com", blurb:"Honey-water boiled, wood-fired bagels with smoked-trout spread.", dish:"Must-order: Everything bagel + scallion cream cheese.", rating:null, reviews:null, placeId:null},
-{idx:42,name:"Brooklyn Bagel & Coffee",lat:40.747395,lon:-74.001799,cat:"bagels",price:"$",cuisine:"Classic NY",url:"https://www.brooklynbagelandcoffeecompany.com", blurb:"Queens-born outfit famous for bacon-scallion cream cheese.", dish:"Must-order: French toast bagel, toasted.", rating:null, reviews:null, placeId:null},
-{idx:43,name:"Bagel Market",lat:40.748195,lon:-73.994097,cat:"bagels",price:"$",cuisine:"Modern Bagel",url:"https://thebagelmarket.com", blurb:"Rainbow bagels and over-stuffed breakfast sandwiches.", dish:"Must-order: ‘Hungry Man’ egg & bacon bagel.", rating:null, reviews:null, placeId:null},
-{idx:44,name:"Ess-a-Bagel 6th Ave",lat:40.744700,lon:-73.988400,cat:"bagels",price:"$",cuisine:"Classic NY",url:"https://www.ess-a-bagel.com", blurb:"Pillow-soft, nearly pound-heavy bagels piled high with lox.", dish:"Must-order: classic lox & scallion on everything.", rating:null, reviews:null, placeId:null},
-{idx:45,name:"Liberty Bagels",lat:40.750870,lon:-73.990050,cat:"bagels",price:"$",cuisine:"Loaded Bagels",url:"https://libertybagels.com", blurb:"Fruity-pebble rainbow bagels and 25+ cream-cheese flavors.", dish:"Must-order: Liberty Deluxe turkey BLT.", rating:null, reviews:null, placeId:null},
-{idx:46,name:"Bo’s Bagels Nomad",lat:40.742349,lon:-73.988900,cat:"bagels",price:"$",cuisine:"Harlem Export",url:"https://www.bosbagels.com", blurb:"Hand-rolled, 24-hour fermented dough yields proper chew.", dish:"Must-order: pimento-cheese everything bagel.", rating:null, reviews:null, placeId:null},
-{idx:47,name:"Best Bagel & Coffee",lat:40.750366,lon:-73.992929,cat:"bagels",price:"$",cuisine:"Deluxe Bagel",url:"https://bestbagelandcoffee.com", blurb:"Monstrous sandwiches feed commuters near Penn Station.", dish:"Must-order: pastrami-egg-cheese on sesame.", rating:null, reviews:null, placeId:null},
-{idx:48,name:"Murray’s Bagels",lat:40.738950,lon:-73.997600,cat:"bagels",price:"$",cuisine:"Classic",url:"https://murraysbagels.com", blurb:"Boiled-baked West Village institution—no toasted bagels before noon!", dish:"Must-order: whitefish salad on pumpernickel.", rating:null, reviews:null, placeId:null},
-{idx:49,name:"Tompkins Square Bagels West",lat:40.741698,lon:-73.990698,cat:"bagels",price:"$",cuisine:"Creative Spreads",url:"https://tompkinssquarebagels.com", blurb:"Birthday-cake cream cheese meets hand-rolled bagels.", dish:"Must-order: cinnamon-raisin + birthday-cake spread.", rating:null, reviews:null, placeId:null},
-{idx:50,name:"Hudson Bagels",lat:40.748800,lon:-73.996200,cat:"bagels",price:"$",cuisine:"Hand-Rolled",url:"https://hudsonbagelsnyc.com", blurb:"Newcomer boiling malted dough the old-school way.", dish:"Must-order: classic plain + veggie spread.", rating:null, reviews:null, placeId:null},
-{idx:51,name:"Pop-Up Bagels",lat:40.750127,lon:-73.993963,cat:"bagels",price:"$$",cuisine:"Pop-Up",url:"https://popupbagels.com", blurb:"Award-winning, Connecticut-born bagel pop-up (now permanent) with schmear flights.", dish:"Must-order: maple-bacon cream cheese with hot-everything bagel.", rating:null, reviews:null, placeId:null},
-{idx:52,name:"Morgenstern’s Ice Cream",lat:40.721380,lon:-73.994490,cat:"desserts",price:"$$",cuisine:"Ice Cream",url:"https://www.morgensternsnyc.com", blurb:"Chef-driven scoops like burnt-honey vanilla & Vietnamese coffee.", dish:"Must-order: raw-milk chocolate soft serve.", rating:null, reviews:null, placeId:null},
-{idx:53,name:"Milk Bar Flagship",lat:40.744030,lon:-73.990230,cat:"desserts",price:"$",cuisine:"American Bakery",url:"https://milkbarstore.com", blurb:"Christina Tosi’s cereal-milk soft-serve and compost cookies.", dish:"Must-order: birthday-cake truffles six-pack.", rating:null, reviews:null, placeId:null},
-{idx:54,name:"Sprinkles Cupcakes",lat:40.750990,lon:-73.991300,cat:"desserts",price:"$",cuisine:"Cupcakes",url:"https://www.sprinkles.com", blurb:"ATM cupcake machine dispenses red-velvet 24/7.", dish:"Must-order: red-velvet cupcake with cream-cheese frosting.", rating:null, reviews:null, placeId:null},
-{idx:55,name:"Lady M Cake Boutique",lat:40.751430,lon:-73.982970,cat:"desserts",price:"$$$",cuisine:"French-Japanese Cakes",url:"https://ladym.com", blurb:"20-layer mille-crêpe cakes so thin they melt on contact.", dish:"Must-order: green-tea mille-crêpe slice.", rating:null, reviews:null, placeId:null},
-{idx:56,name:"Dominique Ansel Workshop",lat:40.742660,lon:-73.990520,cat:"desserts",price:"$$$",cuisine:"Pastry Lab",url:"https://dominiqueansel.com", blurb:"Cronut® creator’s R&D kitchen turns out kouign-amann and cookie shots.", dish:"Must-order: monthly Cronut® flavor (arrive early!).", rating:null, reviews:null, placeId:null},
-{idx:57,name:"Amorino Gelato",lat:40.739798,lon:-73.998100,cat:"gelato",price:"$",cuisine:"Gelato",url:"https://www.amorino.com", blurb:"Rose-shaped gelato scoops piled into a petal bouquet.", dish:"Must-order: pistachio & mango gelato rose.", rating:null, reviews:null, placeId:null},
-{idx:58,name:"Spot Dessert Bar",lat:40.747600,lon:-73.988900,cat:"desserts",price:"$$",cuisine:"Asian Fusion Desserts",url:"https://www.spotdessertbar.com", blurb:"Instagrammable ‘Harvest’ parfait looks like a potted plant.", dish:"Must-order: matcha lava cake.", rating:null, reviews:null, placeId:null},
-{idx:59,name:"Levain Bakery",lat:40.739730,lon:-73.991300,cat:"desserts",price:"$",cuisine:"Cookies",url:"https://levainbakery.com", blurb:"Half-pound, molten-center cookies with cult following.", dish:"Must-order: dark-chocolate peanut-butter chip cookie.", rating:null, reviews:null, placeId:null},
-{idx:60,name:"Chip City",lat:40.749260,lon:-73.999520,cat:"desserts",price:"$",cuisine:"Cookies",url:"https://chipcitycookies.com", blurb:"Rotating cookie board changes daily—expect gooey centers.", dish:"Must-order: cannoli-cream cookie (Fridays).", rating:null, reviews:null, placeId:null},
-{idx:61,name:"Eileen’s Cheesecake",lat:40.742210,lon:-73.992620,cat:"desserts",price:"$",cuisine:"Cheesecake",url:"https://eileenscheesecake.com", blurb:"Fluffy, crusted, personal cheesecakes from Soho legend’s kiosk.", dish:"Must-order: strawberry-topped mini cheesecake.", rating:null, reviews:null, placeId:null},
-/* ---------- GELATO (NEW) ---------- */
-{idx:84,name:"Anita Gelato",lat:40.738360,lon:-73.987170,cat:"gelato",price:"$$",cuisine:"Gelato",url:"https://www.anita-gelato.com/", blurb:"Famous for its creamy textures and a signature 'cookieman' flavor.", dish:"Must-order: Cookieman or any fruit sorbet.", rating:null, reviews:null, placeId:null},
-{idx:85,name:"Grom",lat:40.736020,lon:-73.999830,cat:"gelato",price:"$$",cuisine:"Gelato",url:"https://www.grom.it/en/", blurb:"Authentic Italian gelato with a focus on high-quality, natural ingredients.", dish:"Must-order: Pistacchio or Crema di Grom.", rating:null, reviews:null, placeId:null},
-/* ---------- BREAD & PASTRIES (11) ---------- */
-{idx:62,name:"Sullivan Street Bakery",lat:40.748240,lon:-73.993200,cat:"pastries",price:"$$",cuisine:"Italian Bread",url:"https://sullivanstreetbakery.com", blurb:"Jim Lahey’s no-knead Roman bakery—famous for potato pizza slices.", dish:"Must-order: sheet-pan potato pizza square.", rating:null, reviews:null, placeId:null},
-{idx:63,name:"Breads Bakery Chelsea",lat:40.742980,lon:-73.996620,cat:"pastries",price:"$$",cuisine:"Israeli Bakery",url:"https://breadsbakery.com", blurb:"Chocolate babka that dethroned Zabar’s in a blind taste test.", dish:"Must-order: chocolate babka loaf.", rating:null, reviews:null, placeId:null},
-{idx:64,name:"Mah-Ze-Dahr",lat:40.747619,lon:-74.004018,cat:"pastries",price:"$$",cuisine:"Artisan Bakery",url:"https://mahzedahrbakery.com", blurb:"James Beard-winning pastry chef Umber Ahmad’s gluten dreamland.", dish:"Must-order: brown-butter brioche doughnut.", rating:null, reviews:null, placeId:null},
-{idx:65,name:"Daily Provisions 23rd",lat:40.742518,lon:-73.988196,cat:"pastries",price:"$",cuisine:"All-Day Café",url:"https://dailyprovisions.com", blurb:"Union Square Hospitality spin-off known for crullers and breakfast sandwiches.", dish:"Must-order: maple-glazed cruller.", rating:null, reviews:null, placeId:null},
-{idx:66,name:"Fabrique Bakery",lat:40.744632,lon:-73.991998,cat:"pastries",price:"$$",cuisine:"Swedish Bakery",url:"https://fabriqueusa.com", blurb:"Imported stone oven bakes cardamom-scented knots all day.", dish:"Must-order: cardamom bun.", rating:null, reviews:null, placeId:null},
-{idx:67,name:"Lafayette Grand Bakery",lat:40.724487,lon:-73.996410,cat:"pastries",price:"$$$",cuisine:"French Bakery",url:"https://lafayetteny.com", blurb:"Creator of the viral ‘Supreme’ croissant rolls.", dish:"Must-order: pistachio raspberry ‘Supreme’ (arrive by 8 a.m.).", rating:null, reviews:null, placeId:null},
-{idx:68,name:"Ole & Steen",lat:40.743500,lon:-73.990800,cat:"pastries",price:"$$",cuisine:"Danish Bakery",url:"https://oleandsteen.us", blurb:"Copenhagen chain’s first U.S. store—sticky cinnamon ‘social slice’.", dish:"Must-order: cinnamon social slab.", rating:null, reviews:null, placeId:null},
-{idx:69,name:"Pain d’Avignon",lat:40.751178,lon:-73.987300,cat:"pastries",price:"$$",cuisine:"French Bakery",url:"https://paindavignon-nyc.com", blurb:"Cape Cod bakery’s NYC outpost: crusty miche and kouign-amann.", dish:"Must-order: ham & cheese croissant.", rating:null, reviews:null, placeId:null},
-{idx:70,name:"Culture Espresso Bakery",lat:40.754520,lon:-73.991200,cat:"pastries",price:"$",cuisine:"Coffee & Cookies",url:"https://cultureespresso.com", blurb:"Third-wave espresso with gooey chocolate-chip cookies.", dish:"Must-order: triple-chocolate cookie.", rating:null, reviews:null, placeId:null},
-{idx:71,name:"Patisserie Chanson",lat:40.741860,lon:-73.993460,cat:"pastries",price:"$$",cuisine:"Modern French",url:"https://patisseriechanson.com", blurb:"Sous-vide cheesecakes & matcha croissants under pastel arches.", dish:"Must-order: black-sesame Paris-Brest.", rating:null, reviews:null, placeId:null},
-{idx:72,name:"Paris Baguette",lat:40.750060,lon:-73.994200,cat:"pastries",price:"$",cuisine:"Korean Bakery",url:"https://parisbaguette.com", blurb:"Global chain’s Chelsea flagship stacking strawberry cream cakes.", dish:"Must-order: milk-cream bread roll.", rating:null, reviews:null, placeId:null},
-{idx:73, name:"Superbueno", lat:40.722980, lon:-73.987630, cat:"bars", price:"$$$", cuisine:"Mexican Cocktails", url:"https://www.superbuenonyc.com", blurb:"Playful Mexican cocktail bar with creative drinks and small bites.", dish:"Signature Drink: Mushroom Margarita", rating:null, reviews:null, placeId:null},
-{idx:74, name:"Sip & Guzzle", lat:40.732950, lon:-73.999390, cat:"bars", price:"$$$", cuisine:"Dual Concept Cocktail Bar", url:"https://www.sipandguzzlenyc.com", blurb:"Upstairs 'Sip' offers refined cocktails, downstairs 'Guzzle' is more casual.", dish:"Signature Drink: Try the clarified cocktails", rating:null, reviews:null, placeId:null},
-{idx:75, name:"Overstory", lat:40.704790, lon:-74.011940, cat:"bars", price:"$$$$", cuisine:"Rooftop Cocktails", url:"https://www.overstory-nyc.com", blurb:"Stunning views from the 64th floor with sophisticated cocktails.", dish:"Signature Drink: Martini variation", rating:null, reviews:null, placeId:null},
-{idx:76, name:"Clemente Bar", lat:40.721250, lon:-73.982410, cat:"bars", price:"$$$", cuisine:"Lower East Side Cocktails", url:"#", blurb:"Chic LES bar known for good vibes and well-made drinks.", dish:"Signature Drink: Check seasonal menu", rating:null, reviews:null, placeId:null},
-{idx:77, name:"Martiny's", lat:40.739430, lon:-73.986130, cat:"bars", price:"$$$$", cuisine:"Elegant Japanese Cocktails", url:"https://martinysnyc.com", blurb:"Gramercy townhouse bar focused on precise, elegant Japanese cocktail technique.", dish:"Signature Drink: Classic Martini", rating:null, reviews:null, placeId:null},
-{idx:78, name:"Employees Only", lat:40.737970, lon:-74.001550, cat:"bars", price:"$$$", cuisine:"Speakeasy Cocktails", url:"https://employeesonlynyc.com", blurb:"Iconic West Village speakeasy known for classic cocktails and late-night food.", dish:"Signature Drink: EO Gimlet", rating:null, reviews:null, placeId:null},
-{idx:79, name:"Double Chicken Please", lat:40.719230, lon:-73.987680, cat:"bars", price:"$$$", cuisine:"Creative Cocktails & Food", url:"https://doublechickenplease.com", blurb:"Front room has cocktails on tap & fried chicken; back room has highly conceptual drinks.", dish:"Signature Drink: Cold Pizza cocktail", rating:null, reviews:null, placeId:null},
-{idx:80, name:"Maison Premiere", lat:40.715220, lon:-73.960860, cat:"bars", price:"$$$", cuisine:"Oyster Bar & Cocktails", url:"https://maisonpremiere.com", blurb:"New Orleans-inspired Williamsburg bar with extensive oyster selection and absinthe cocktails.", dish:"Signature Drink: Absinthe Colada", rating:null, reviews:null, placeId:null},
-{idx:81, name:"Katana Kitten", lat:40.735770, lon:-74.002190, cat:"bars", price:"$$$", cuisine:"Japanese-American Cocktails", url:"https://www.katanakitten.com", blurb:"Highball haven blending Japanese precision with American bar vibes.", dish:"Signature Drink: Hinoki Martini", rating:null, reviews:null, placeId:null},
-{idx:82, name:"Angel's Share", lat:40.733500, lon:-73.998800, cat:"bars", price:"$$$", cuisine:"Speakeasy (Relocated)", url:"https://angelssharenyc.com", blurb:"Legendary Japanese speakeasy, now relocated to the basement of Nakaji.", dish:"Signature Drink: Flirtibird", rating:null, reviews:null, placeId:null},
-{idx:83, name:"Dante", lat:40.730290, lon:-74.001940, cat:"bars", price:"$$$", cuisine:"Negronis & Italian Aperitivo", url:"https://www.dante-nyc.com", blurb:"Historic Caffe Dante, reimagined as an award-winning aperitivo bar famous for Negronis.", dish:"Signature Drink: Negroni Bianco", rating:null, reviews:null, placeId:null}
+/* ---------- DATA (changed to let for dynamic adding/deleting) ---------- */
+let data = [
+    {idx:1,name:"Eleven Madison Park",lat:40.741673,lon:-73.987244,cat:"top",price:"$$$$",cuisine:"Modern American",url:"https://www.elevenmadisonpark.com", blurb:"Daniel Humm’s three-star icon pivoted to an all-plant menu without losing the sense of theater.", dish:"Must-order: the sunflower butter bread service."},
+    {idx:2,name:"Atomix",lat:40.744306,lon:-73.982806,cat:"top",price:"$$$$",cuisine:"Korean Tasting",url:"https://www.atomixnyc.com", blurb:"A 14-seat counter where each course is presented with a collectible card explaining Korean ingredients.", dish:"Must-order: abalone juk with seaweed butter."},
+    {idx:3,name:"COTE Korean Steakhouse",lat:40.741399,lon:-73.991100,cat:"top",price:"$$$$",cuisine:"Korean BBQ",url:"https://www.cotekoreansteakhouse.com", blurb:"The world’s only Michelin-starred K-BBQ marries dry-aged beef with a clubby cocktail bar.", dish:"Must-order: Butcher’s Feast (prime ribeye & marinated short rib)."},
+    {idx:4,name:"Ai Fiori",lat:40.750060,lon:-73.983897,cat:"top",price:"$$$$",cuisine:"French-Italian",url:"https://www.aifiorinyc.com", blurb:"Chef Michael White’s Riviera-inspired pastas and seafood served from a marble grand staircase.", dish:"Must-order: lobster velouté with black-truffle gnocchetti."},
+    {idx:5,name:"Koloman",lat:40.745669,lon:-73.988094,cat:"top",price:"$$$$",cuisine:"Austro-French",url:"https://www.kolomanrestaurant.com", blurb:"Markus Glocker reinvents Viennese classics in an art-nouveau room inside the Ace Hotel.", dish:"Must-order: vanilla soufflé with elderflower crème-anglaise."},
+    {idx:6,name:"Gramercy Tavern",lat:40.738281,lon:-73.988126,cat:"top",price:"$$$$",cuisine:"New American",url:"https://www.gramercytavern.com", blurb:"Danny Meyer’s wood-beamed standby still defines warm service and seasonal cooking.", dish:"Must-order: smoked trout with horseradish & dill."},
+    {idx:7,name:"Rezdôra",lat:40.738395,lon:-73.988490,cat:"top",price:"$$$$",cuisine:"Emilia-Romagna Italian",url:"https://www.rezdora.nyc", blurb:"Hand-rolled pasta ritual from Osteria Francescana alumnus Stefano Secchi.", dish:"Must-order: grandma walking through forest mushroom pasta."},
+    {idx:8,name:"The Clocktower",lat:40.741579,lon:-73.987669,cat:"top",price:"$$$$",cuisine:"Modern British",url:"https://www.theclocktowernyc.com", blurb:"Jason Atherton’s mahogany dining rooms hide inside the Edition Hotel’s turn-of-the-century clocktower.", dish:"Must-order: beef Wellington for two."},
+    {idx:9,name:"Noda",lat:40.739266,lon:-73.993621,cat:"top",price:"$$$$",cuisine:"Edomae Sushi",url:"https://www.noda.nyc", blurb:"Eight seats, hinoki counter, 14-course omakase flown in from Toyosu Market daily.", dish:"Must-order: aged bluefin akami with shark-skin wasabi."},
+    {idx:10,name:"Gabriel Kreuther",lat:40.755224,lon:-73.982164,cat:"top",price:"$$$$",cuisine:"Alsatian French",url:"https://www.gknyc.com", blurb:"Stork murals and bacon bread introduce chef Kreuther’s luxe take on Alsace.", dish:"Must-order: sturgeon sauerkraut tart with caviar."},
+    {idx:11,name:"Shukette",lat:40.747180,lon:-74.000590,cat:"main",price:"$$",cuisine:"Middle Eastern",url:"https://www.shukettenyc.com", blurb:"Chef Ayesha Nurdjaja’s rowdy grill counter sends out blistered laffa and za’atar-dusted fries.", dish:"Must-order: Jaffa feast (whole fish, salatim, laffa)."},
+    {idx:12,name:"Txikito",lat:40.747530,lon:-74.000370,cat:"main",price:"$$",cuisine:"Basque",url:"https://www.txikitonyc.com", blurb:"Tiny bar where pintxos arrive pinned with toothpicks and Spanish vermouth flows on tap.", dish:"Must-order: morcilla & egg ‘slider’ (Bikini Txistorra)."},
+    {idx:13,name:"Cookshop",lat:40.745638,lon:-74.005669,cat:"main",price:"$$",cuisine:"Seasonal American",url:"https://www.cookshopny.com", blurb:"Locavore brunch magnet across from the High Line—solar panels power the kitchen.", dish:"Must-order: wood-fired shakshuka."},
+    {idx:14,name:"Hav & Mar",lat:40.751013,lon:-74.005780,cat:"main",price:"$$$",cuisine:"Afro-Nordic Seafood",url:"https://www.havandmar.com", blurb:"Marcus Samuelsson marries Ethiopian spice with Scandinavian technique.", dish:"Must-order: berbere-spiced whole branzino."},
+    {idx:15,name:"ABC Kitchen",lat:40.737750,lon:-73.989630,cat:"main",price:"$$$",cuisine:"Farm-to-Table",url:"https://www.abckitchennyc.com", blurb:"Jean-Georges’ original farm-to-table room lit by reclaimed chandeliers.", dish:"Must-order: roasted carrot & avocado salad."},
+    {idx:16,name:"La Pecora Bianca",lat:40.743784,lon:-73.989362,cat:"main",price:"$$",cuisine:"Italian",url:"https://www.lapecorabianca.com", blurb:"All-day spritzes and house-made rigatoni in a bright, tile-lined room.", dish:"Must-order: pesto gramigna with sausage."},
+    {idx:17,name:"L’Amico",lat:40.747174,lon:-73.989956,cat:"main",price:"$$$",cuisine:"Italian-American",url:"https://www.lamico.nyc", blurb:"Hotel Eventi’s hearth-fed pizzas and pastas by Laurent Tourondel.", dish:"Must-order: cacio-e-pepe focaccia."},
+    {idx:18,name:"Legacy Records",lat:40.754855,lon:-73.998472,cat:"main",price:"$$$",cuisine:"Italian",url:"https://www.legacyrecordsrestaurant.com", blurb:"Charlie Bird team’s swanky dining room tucked into a Hudson Yards condo tower.", dish:"Must-order: chicken liver agnolotti."},
+    {idx:19,name:"Ci Siamo",lat:40.753324,lon:-73.998977,cat:"main",price:"$$$",cuisine:"Live-Fire Italian",url:"https://www.cisiamonyc.com", blurb:"Hillary Sterling’s open-hearth kitchen perfumes the room with smoldering olive logs.", dish:"Must-order: focaccia di Recco with stracchino."},
+    {idx:20,name:"Kyma Flatiron",lat:40.739544,lon:-73.992612,cat:"main",price:"$$",cuisine:"Greek",url:"https://www.kymaflatiron.com", blurb:"White-washed Cycladic dining room turns out whole grilled lavraki and ouzo cocktails.", dish:"Must-order: saganaki cheese with Metaxa flambé."},
+    {idx:21,name:"Dim Sum Sam",lat:40.744850,lon:-73.995320,cat:"chinese",price:"$$",cuisine:"Dim Sum",url:"https://dimsumsam.com", blurb:"Counter-service baskets of steamed shrimp har-gow and rice rolls made to order.", dish:"Must-order: molten salted-egg yolk buns."},
+    {idx:22,name:"Hao Noodle",lat:40.741204,lon:-73.999196,cat:"chinese",price:"$$$",cuisine:"Chongqing Noodles",url:"https://www.haonoodle.com", blurb:"Floral china and silk lanterns set the stage for numbing-spicy beef noodles.", dish:"Must-order: grandma’s chicken soup noodles."},
+    {idx:23,name:"Xi’an Famous Foods",lat:40.740410,lon:-74.000620,cat:"chinese",price:"$$",cuisine:"Shaanxi",url:"https://xianfoods.com", blurb:"Hand-torn biang-biang ribbons slicked with cumin-lamb chili oil.", dish:"Must-order: spicy cumin lamb noodles."},
+    {idx:24,name:"Mala Project",lat:40.750588,lon:-73.993215,cat:"chinese",price:"$$",cuisine:"Dry-Pot Sichuan",url:"https://malaproject.nyc", blurb:"Build-your-own Sichuan dry pot with 50+ mix-ins, no broth required.", dish:"Must-order: lotus root & beef-tongue dry pot."},
+    {idx:25,name:"RedFarm",lat:40.744299,lon:-74.004110,cat:"chinese",price:"$$$",cuisine:"NYC Chinese-Fusion",url:"https://redfarmnyc.com", blurb:"Playful dim-sum like Pac-Man shrimp dumplings in a barn-chic room.", dish:"Must-order: Katz’s pastrami egg roll."},
+    {idx:26,name:"Junzi Kitchen",lat:40.748879,lon:-73.984060,cat:"chinese",price:"$$",cuisine:"Northern Chinese",url:"https://junzi.kitchen", blurb:"Fast-casual chun-bing wraps filled with cumin lamb and sweet potato noodles.", dish:"Must-order: jianbing-style scallion pancake."},
+    {idx:27,name:"Han Dynasty",lat:40.743949,lon:-73.983038,cat:"chinese",price:"$$",cuisine:"Sichuan",url:"https://handynasty.net", blurb:"Philadelphia import famed for its ‘dry pepper’ crispy wings.", dish:"Must-order: dan-dan noodles level-6 spice."},
+    {idx:28,name:"Spicy Village Express",lat:40.749176,lon:-73.996798,cat:"chinese",price:"$",cuisine:"Henan",url:"https://spicyvillagenyc.com", blurb:"Mini offshoot slings the legendary big-plate chicken over hand-pulled noodles.", dish:"Must-order: big plate chicken for two."},
+    {idx:29,name:"Noodle Q",lat:40.746515,lon:-74.001429,cat:"chinese",price:"$",cuisine:"Hand-Pulled Noodles",url:"#", blurb:"No-frills counter for Lanzhou-style beef noodle soup with ribbons as wide as belts.", dish:"Must-order: extra-wide noodles in clear broth."},
+    {idx:30,name:"Brooklyn Dumpling Shop",lat:40.741948,lon:-73.996261,cat:"chinese",price:"$",cuisine:"Automat Dumplings",url:"https://brooklyndumplingshop.com", blurb:"24-hour Automat serves cheeseburger and Philly cheese-steak dumplings from lockers.", dish:"Must-order: pastrami dumplings with mustard."},
+    {idx:31,name:"NY Pizza Suprema",lat:40.750580,lon:-73.994830,cat:"pizza",price:"$",cuisine:"Slice Joint",url:"https://nypizzasuprema.com", blurb:"50-year Penn Station slice legend—sauce first, cheese second.", dish:"Must-order: upside-down Sicilian slice."},
+    {idx:32,name:"Joe’s Pizza – 24th St",lat:40.744233,lon:-73.992495,cat:"pizza",price:"$",cuisine:"Classic NY",url:"https://www.joespizzanyc.com", blurb:"West Village icon’s Chelsea outpost keeps the foldable triangles flowing till 4 AM.", dish:"Must-order: plain cheese slice, extra crisp."},
+    {idx:33,name:"Lucali Slice",lat:40.748100,lon:-73.994600,cat:"pizza",price:"$$",cuisine:"Brick-Oven",url:"#", blurb:"Counter spin-off of Carroll Gardens cult favorite—same sweet basil sauce by the slice. (Reported Closed)", dish:"Must-order: pepperoni & hot honey."},
+    {idx:34,name:"Starita",lat:40.752321,lon:-73.991205,cat:"pizza",price:"$$",cuisine:"Neapolitan",url:"https://staritanapoli.com", blurb:"Legendary Naples pizzeria’s lightly fried montanara pies land in NoMad.", dish:"Must-order: Montanara Margherita (flash-fried crust)."},
+    {idx:35,name:"Prince St Pizza Chelsea",lat:40.743108,lon:-74.000789,cat:"pizza",price:"$",cuisine:"Square Slice",url:"https://princestpizzanyc.com", blurb:"Soho’s spicy ‘roni cups migrate uptown—be prepared for a queue.", dish:"Must-order: Spicy Spring square slice."},
+    {idx:36,name:"Scarr’s Express",lat:40.743899,lon:-73.995600,cat:"pizza",price:"$",cuisine:"Whole-Wheat Slice",url:"https://scarrspizza.com", blurb:"Milled-in-house flour yields a 70s-style slice with better chew.", dish:"Must-order: plain slice; add Sicilian if hot."},
+    {idx:37,name:"Artichoke Basille’s",lat:40.748057,lon:-73.994428,cat:"pizza",price:"$",cuisine:"Late-Night",url:"https://artichokepizza.com", blurb:"Rich, creamy artichoke-spinach slice that eats like lasagna at 3 AM.", dish:"Must-order: artichoke slice, obviously."},
+    {idx:38,name:"Two Boots Flatiron",lat:40.740870,lon:-73.990350,cat:"pizza",price:"$",cuisine:"Cajun Slice",url:"https://twoboots.com", blurb:"Cornmeal crust and andouille toppings meet punk-rock decor.", dish:"Must-order: Bayou Beast slice."},
+    {idx:39,name:"Slice Joint",lat:40.749499,lon:-74.002300,cat:"pizza",price:"$",cuisine:"Thin Crust",url:"https://slicejointpizza.com", blurb:"Paper-thin squares cooked in blue-steel pans by a Roberta’s alum.", dish:"Must-order: sausage & fennel round slice."},
+    {idx:40,name:"Lombardi’s Chelsea",lat:40.747380,lon:-74.000540,cat:"pizza",price:"$$",cuisine:"Coal-Oven",url:"https://firstpizza.com", blurb:"Offshoot of America’s first licensed pizzeria uses the same coal-blistered crust. (Reported Closed)", dish:"Must-order: Margherita with fresh basil."},
+    {idx:41,name:"Black Seed Bagels",lat:40.744895,lon:-73.983598,cat:"bagels",price:"$",cuisine:"Montreal-NY",url:"https://blackseedbagels.com", blurb:"Honey-water boiled, wood-fired bagels with smoked-trout spread.", dish:"Must-order: Everything bagel + scallion cream cheese."},
+    {idx:42,name:"Brooklyn Bagel & Coffee",lat:40.747395,lon:-74.001799,cat:"bagels",price:"$",cuisine:"Classic NY",url:"https://www.brooklynbagelandcoffeecompany.com", blurb:"Queens-born outfit famous for bacon-scallion cream cheese.", dish:"Must-order: French toast bagel, toasted."},
+    {idx:43,name:"Bagel Market",lat:40.748195,lon:-73.994097,cat:"bagels",price:"$",cuisine:"Modern Bagel",url:"https://thebagelmarket.com", blurb:"Rainbow bagels and over-stuffed breakfast sandwiches.", dish:"Must-order: ‘Hungry Man’ egg & bacon bagel."},
+    {idx:44,name:"Ess-a-Bagel 6th Ave",lat:40.744700,lon:-73.988400,cat:"bagels",price:"$",cuisine:"Classic NY",url:"https://www.ess-a-bagel.com", blurb:"Pillow-soft, nearly pound-heavy bagels piled high with lox.", dish:"Must-order: classic lox & scallion on everything."},
+    {idx:45,name:"Liberty Bagels",lat:40.750870,lon:-73.990050,cat:"bagels",price:"$",cuisine:"Loaded Bagels",url:"https://libertybagels.com", blurb:"Fruity-pebble rainbow bagels and 25+ cream-cheese flavors.", dish:"Must-order: Liberty Deluxe turkey BLT."},
+    {idx:46,name:"Bo’s Bagels Nomad",lat:40.742349,lon:-73.988900,cat:"bagels",price:"$",cuisine:"Harlem Export",url:"https://www.bosbagels.com", blurb:"Hand-rolled, 24-hour fermented dough yields proper chew.", dish:"Must-order: pimento-cheese everything bagel."},
+    {idx:47,name:"Best Bagel & Coffee",lat:40.750366,lon:-73.992929,cat:"bagels",price:"$",cuisine:"Deluxe Bagel",url:"https://bestbagelandcoffee.com", blurb:"Monstrous sandwiches feed commuters near Penn Station.", dish:"Must-order: pastrami-egg-cheese on sesame."},
+    {idx:48,name:"Murray’s Bagels",lat:40.738950,lon:-73.997600,cat:"bagels",price:"$",cuisine:"Classic",url:"https://murraysbagels.com", blurb:"Boiled-baked West Village institution—no toasted bagels before noon!", dish:"Must-order: whitefish salad on pumpernickel."},
+    {idx:49,name:"Tompkins Square Bagels West",lat:40.741698,lon:-73.990698,cat:"bagels",price:"$",cuisine:"Creative Spreads",url:"https://tompkinssquarebagels.com", blurb:"Birthday-cake cream cheese meets hand-rolled bagels.", dish:"Must-order: cinnamon-raisin + birthday-cake spread."},
+    {idx:50,name:"Hudson Bagels",lat:40.748800,lon:-73.996200,cat:"bagels",price:"$",cuisine:"Hand-Rolled",url:"https://hudsonbagelsnyc.com", blurb:"Newcomer boiling malted dough the old-school way.", dish:"Must-order: classic plain + veggie spread."},
+    {idx:51,name:"Pop-Up Bagels",lat:40.750127,lon:-73.993963,cat:"bagels",price:"$$",cuisine:"Pop-Up",url:"https://popupbagels.com", blurb:"Award-winning, Connecticut-born bagel pop-up (now permanent) with schmear flights.", dish:"Must-order: maple-bacon cream cheese with hot-everything bagel."},
+    {idx:52,name:"Morgenstern’s Ice Cream",lat:40.721380,lon:-73.994490,cat:"desserts",price:"$$",cuisine:"Ice Cream",url:"https://www.morgensternsnyc.com", blurb:"Chef-driven scoops like burnt-honey vanilla & Vietnamese coffee.", dish:"Must-order: raw-milk chocolate soft serve."},
+    {idx:53,name:"Milk Bar Flagship",lat:40.744030,lon:-73.990230,cat:"desserts",price:"$",cuisine:"American Bakery",url:"https://milkbarstore.com", blurb:"Christina Tosi’s cereal-milk soft-serve and compost cookies.", dish:"Must-order: birthday-cake truffles six-pack."},
+    {idx:54,name:"Sprinkles Cupcakes",lat:40.750990,lon:-73.991300,cat:"desserts",price:"$",cuisine:"Cupcakes",url:"https://www.sprinkles.com", blurb:"ATM cupcake machine dispenses red-velvet 24/7.", dish:"Must-order: red-velvet cupcake with cream-cheese frosting."},
+    {idx:55,name:"Lady M Cake Boutique",lat:40.751430,lon:-73.982970,cat:"desserts",price:"$$$",cuisine:"French-Japanese Cakes",url:"https://ladym.com", blurb:"20-layer mille-crêpe cakes so thin they melt on contact.", dish:"Must-order: green-tea mille-crêpe slice."},
+    {idx:56,name:"Dominique Ansel Workshop",lat:40.742660,lon:-73.990520,cat:"desserts",price:"$$$",cuisine:"Pastry Lab",url:"https://dominiqueansel.com", blurb:"Cronut® creator’s R&D kitchen turns out kouign-amann and cookie shots.", dish:"Must-order: monthly Cronut® flavor (arrive early!)."},
+    {idx:57,name:"Amorino Gelato",lat:40.739798,lon:-73.998100,cat:"gelato",price:"$",cuisine:"Gelato",url:"https://www.amorino.com", blurb:"Rose-shaped gelato scoops piled into a petal bouquet.", dish:"Must-order: pistachio & mango gelato rose."},
+    {idx:58,name:"Spot Dessert Bar",lat:40.747600,lon:-73.988900,cat:"desserts",price:"$$",cuisine:"Asian Fusion Desserts",url:"https://www.spotdessertbar.com", blurb:"Instagrammable ‘Harvest’ parfait looks like a potted plant.", dish:"Must-order: matcha lava cake."},
+    {idx:59,name:"Levain Bakery",lat:40.739730,lon:-73.991300,cat:"desserts",price:"$",cuisine:"Cookies",url:"https://levainbakery.com", blurb:"Half-pound, molten-center cookies with cult following.", dish:"Must-order: dark-chocolate peanut-butter chip cookie."},
+    {idx:60,name:"Chip City",lat:40.749260,lon:-73.999520,cat:"desserts",price:"$",cuisine:"Cookies",url:"https://chipcitycookies.com", blurb:"Rotating cookie board changes daily—expect gooey centers.", dish:"Must-order: cannoli-cream cookie (Fridays)."},
+    {idx:61,name:"Eileen’s Cheesecake",lat:40.742210,lon:-73.992620,cat:"desserts",price:"$",cuisine:"Cheesecake",url:"https://eileenscheesecake.com", blurb:"Fluffy, crusted, personal cheesecakes from Soho legend’s kiosk.", dish:"Must-order: strawberry-topped mini cheesecake."},
+    {idx:84,name:"Anita Gelato",lat:40.738360,lon:-73.987170,cat:"gelato",price:"$$",cuisine:"Gelato",url:"https://www.anita-gelato.com/", blurb:"Famous for its creamy textures and a signature 'cookieman' flavor.", dish:"Must-order: Cookieman or any fruit sorbet."},
+    {idx:85,name:"Grom",lat:40.736020,lon:-73.999830,cat:"gelato",price:"$$",cuisine:"Gelato",url:"https://www.grom.it/en/", blurb:"Authentic Italian gelato with a focus on high-quality, natural ingredients.", dish:"Must-order: Pistacchio or Crema di Grom."},
+    {idx:62,name:"Sullivan Street Bakery",lat:40.748240,lon:-73.993200,cat:"pastries",price:"$$",cuisine:"Italian Bread",url:"https://sullivanstreetbakery.com", blurb:"Jim Lahey’s no-knead Roman bakery—famous for potato pizza slices.", dish:"Must-order: sheet-pan potato pizza square."},
+    {idx:63,name:"Breads Bakery Chelsea",lat:40.742980,lon:-73.996620,cat:"pastries",price:"$$",cuisine:"Israeli Bakery",url:"https://breadsbakery.com", blurb:"Chocolate babka that dethroned Zabar’s in a blind taste test.", dish:"Must-order: chocolate babka loaf."},
+    {idx:64,name:"Mah-Ze-Dahr",lat:40.747619,lon:-74.004018,cat:"pastries",price:"$$",cuisine:"Artisan Bakery",url:"https://mahzedahrbakery.com", blurb:"James Beard-winning pastry chef Umber Ahmad’s gluten dreamland.", dish:"Must-order: brown-butter brioche doughnut."},
+    {idx:65,name:"Daily Provisions 23rd",lat:40.742518,lon:-73.988196,cat:"pastries",price:"$",cuisine:"All-Day Café",url:"https://dailyprovisions.com", blurb:"Union Square Hospitality spin-off known for crullers and breakfast sandwiches.", dish:"Must-order: maple-glazed cruller."},
+    {idx:66,name:"Fabrique Bakery",lat:40.744632,lon:-73.991998,cat:"pastries",price:"$$",cuisine:"Swedish Bakery",url:"https://fabriqueusa.com", blurb:"Imported stone oven bakes cardamom-scented knots all day.", dish:"Must-order: cardamom bun."},
+    {idx:67,name:"Lafayette Grand Bakery",lat:40.724487,lon:-73.996410,cat:"pastries",price:"$$$",cuisine:"French Bakery",url:"https://lafayetteny.com", blurb:"Creator of the viral ‘Supreme’ croissant rolls.", dish:"Must-order: pistachio raspberry ‘Supreme’ (arrive by 8 a.m.)."},
+    {idx:68,name:"Ole & Steen",lat:40.743500,lon:-73.990800,cat:"pastries",price:"$$",cuisine:"Danish Bakery",url:"https://oleandsteen.us", blurb:"Copenhagen chain’s first U.S. store—sticky cinnamon ‘social slice’.", dish:"Must-order: cinnamon social slab."},
+    {idx:69,name:"Pain d’Avignon",lat:40.751178,lon:-73.987300,cat:"pastries",price:"$$",cuisine:"French Bakery",url:"https://paindavignon-nyc.com", blurb:"Cape Cod bakery’s NYC outpost: crusty miche and kouign-amann.", dish:"Must-order: ham & cheese croissant."},
+    {idx:70,name:"Culture Espresso Bakery",lat:40.754520,lon:-73.991200,cat:"pastries",price:"$",cuisine:"Coffee & Cookies",url:"https://cultureespresso.com", blurb:"Third-wave espresso with gooey chocolate-chip cookies.", dish:"Must-order: triple-chocolate cookie."},
+    {idx:71,name:"Patisserie Chanson",lat:40.741860,lon:-73.993460,cat:"pastries",price:"$$",cuisine:"Modern French",url:"https://patisseriechanson.com", blurb:"Sous-vide cheesecakes & matcha croissants under pastel arches.", dish:"Must-order: black-sesame Paris-Brest."},
+    {idx:72,name:"Paris Baguette",lat:40.750060,lon:-73.994200,cat:"pastries",price:"$",cuisine:"Korean Bakery",url:"https://parisbaguette.com", blurb:"Global chain’s Chelsea flagship stacking strawberry cream cakes.", dish:"Must-order: milk-cream bread roll."},
+    {idx:73, name:"Superbueno", lat:40.722980, lon:-73.987630, cat:"bars", price:"$$$", cuisine:"Mexican Cocktails", url:"https://www.superbuenonyc.com", blurb:"Playful Mexican cocktail bar with creative drinks and small bites.", dish:"Signature Drink: Mushroom Margarita"},
+    {idx:74, name:"Sip & Guzzle", lat:40.732950, lon:-73.999390, cat:"bars", price:"$$$", cuisine:"Dual Concept Cocktail Bar", url:"https://www.sipandguzzlenyc.com", blurb:"Upstairs 'Sip' offers refined cocktails, downstairs 'Guzzle' is more casual.", dish:"Signature Drink: Try the clarified cocktails"},
+    {idx:75, name:"Overstory", lat:40.704790, lon:-74.011940, cat:"bars", price:"$$$$", cuisine:"Rooftop Cocktails", url:"https://www.overstory-nyc.com", blurb:"Stunning views from the 64th floor with sophisticated cocktails.", dish:"Signature Drink: Martini variation"},
+    {idx:76, name:"Clemente Bar", lat:40.721250, lon:-73.982410, cat:"bars", price:"$$$", cuisine:"Lower East Side Cocktails", url:"#", blurb:"Chic LES bar known for good vibes and well-made drinks.", dish:"Signature Drink: Check seasonal menu"},
+    {idx:77, name:"Martiny's", lat:40.739430, lon:-73.986130, cat:"bars", price:"$$$$", cuisine:"Elegant Japanese Cocktails", url:"https://martinysnyc.com", blurb:"Gramercy townhouse bar focused on precise, elegant Japanese cocktail technique.", dish:"Signature Drink: Classic Martini"},
+    {idx:78, name:"Employees Only", lat:40.737970, lon:-74.001550, cat:"bars", price:"$$$", cuisine:"Speakeasy Cocktails", url:"https://employeesonlynyc.com", blurb:"Iconic West Village speakeasy known for classic cocktails and late-night food.", dish:"Signature Drink: EO Gimlet"},
+    {idx:79, name:"Double Chicken Please", lat:40.719230, lon:-73.987680, cat:"bars", price:"$$$", cuisine:"Creative Cocktails & Food", url:"https://doublechickenplease.com", blurb:"Front room has cocktails on tap & fried chicken; back room has highly conceptual drinks.", dish:"Signature Drink: Cold Pizza cocktail"},
+    {idx:80, name:"Maison Premiere", lat:40.715220, lon:-73.960860, cat:"bars", price:"$$$", cuisine:"Oyster Bar & Cocktails", url:"https://maisonpremiere.com", blurb:"New Orleans-inspired Williamsburg bar with extensive oyster selection and absinthe cocktails.", dish:"Signature Drink: Absinthe Colada"},
+    {idx:81, name:"Katana Kitten", lat:40.735770, lon:-74.002190, cat:"bars", price:"$$$", cuisine:"Japanese-American Cocktails", url:"https://www.katanakitten.com", blurb:"Highball haven blending Japanese precision with American bar vibes.", dish:"Signature Drink: Hinoki Martini"},
+    {idx:82, name:"Angel's Share", lat:40.733500, lon:-73.998800, cat:"bars", price:"$$$", cuisine:"Speakeasy (Relocated)", url:"https://angelssharenyc.com", blurb:"Legendary Japanese speakeasy, now relocated to the basement of Nakaji.", dish:"Signature Drink: Flirtibird"},
+    {idx:83, name:"Dante", lat:40.730290, lon:-74.001940, cat:"bars", price:"$$$", cuisine:"Negronis & Italian Aperitivo", url:"https://www.dante-nyc.com", blurb:"Historic Caffe Dante, reimagined as an award-winning aperitivo bar famous for Negronis.", dish:"Signature Drink: Negroni Bianco"}
 ];
 
-
 const CATEGORIES = {
-    top:"💎 Top-Tier",
-    main:"🥂 Mainstream",
-    chinese:"🥟 Chinese / Dim Sum",
-    pizza:"🍕 Pizza",
-    bagels:"🥯 Bagels",
-    desserts:"🍰 Desserts",
-    gelato:"🍨 Gelato",
-    pastries:"🥐 Bread & Pastries",
-    bars:"🍸 Bars & Cocktails"
+    top:"💎 Top-Tier",main:"🥂 Mainstream",chinese:"🥟 Chinese / Dim Sum",pizza:"🍕 Pizza",bagels:"🥯 Bagels",
+    desserts:"🍰 Desserts",gelato:"🍨 Gelato",pastries:"🥐 Bread & Pastries",bars:"🍸 Bars & Cocktails"
 };
 
 const catFilterSelect = document.getElementById("catFilter");
@@ -217,6 +207,7 @@ Object.keys(CATEGORIES).forEach(key => {
 /* ---------- RENDER CARDS ---------- */
 const cardHTML = r => `
 <div class="card ${r.cat}" id="card${r.idx}">
+  <button class="delete-btn" data-idx="${r.idx}" title="Delete this place">×</button>
   <span class="index">${r.idx}.</span>
   <a class="restLink" href="${r.url || '#'}" target="_blank">${r.name}</a>
   <span class="price">${r.price}</span><br>
@@ -241,81 +232,61 @@ Object.keys(CATEGORIES).forEach(cat=>{
   categoryCardContainer.id = `cards-container-${cat}`;
   list.appendChild(categoryCardContainer);
   
-  data.filter(d => d.cat === cat)
-      .forEach(d => {
-          categoryCardContainer.insertAdjacentHTML("beforeend", cardHTML(d));
-      });
+  data.filter(d => d.cat === cat).forEach(d => {
+      categoryCardContainer.insertAdjacentHTML("beforeend", cardHTML(d));
+  });
 });
 
 /* ---------- FILTER & SYNC ---------- */
 document.getElementById("catFilter").addEventListener("change",()=>{
-  const sel=document.getElementById("catFilter").value;
-  data.forEach(d=>{
-     const cardElement = document.getElementById("card"+d.idx);
-     if (cardElement) {
-         const show = sel === "all" || d.cat === sel;
-         cardElement.style.display = show ? "block" : "none";
-         
-         const heading = cardElement.closest('.cards-in-category-container')?.previousElementSibling;
-         if (heading) {
-             heading.style.display = show ? "block" : "none";
-         }
-     }
-  });
-  
-  Object.keys(CATEGORIES).forEach(cat => {
-      const container = document.getElementById(`cards-container-${cat}`);
-      const heading = container.previousElementSibling;
-      const shouldShow = sel === 'all' || sel === cat;
-      heading.style.display = shouldShow ? "block" : "none";
-      // This part ensures empty categories are hidden when filtering
-      const visibleCards = container.querySelectorAll('.card[style*="display: block"]').length;
-      if (container.children.length > 0 && visibleCards === 0 && sel !== 'all') {
-          heading.style.display = "none";
-      }
-  });
+    const sel=document.getElementById("catFilter").value;
+    const allCards = document.querySelectorAll('.card');
+    let visibleCategories = new Set();
+
+    allCards.forEach(card => {
+        const cardCategory = Array.from(card.classList).find(c => CATEGORIES[c]);
+        const show = sel === 'all' || cardCategory === sel;
+        card.style.display = show ? "block" : "none";
+        if (show) {
+            visibleCategories.add(cardCategory);
+        }
+    });
+
+    Object.keys(CATEGORIES).forEach(cat => {
+        const heading = document.getElementById(`cards-container-${cat}`).previousElementSibling;
+        const showHeading = sel === 'all' || visibleCategories.has(cat);
+        heading.style.display = showHeading ? 'block' : 'none';
+    });
 });
 
-
 /********************************************************************
- *  Google Reviews  – look up each place, then inject stars & counts *
+ *  Google Reviews & Place Details                                 *
  ********************************************************************/
 function renderStars(avg){
   if (typeof avg !== 'number' || avg <= 0) return '';
   const full = Math.floor(avg);
-  const half = avg - full >= 0.5;
   let html = '<span style="color:#f4b400; font-size: 1.1em; line-height: 1;">';
-  for(let i=0; i<5; i++){
-    if(i < full) html+='★';
-    else if(i === full && half) html+='★';
-    else html+='☆';
-  }
+  for(let i=0; i<5; i++) html += (i < full) ? '★' : '☆';
   html+='</span>';
   return html;
 }
 
 function injectRating(cardId, avg, total){
   const node = document.getElementById(cardId);
-  if(!node || typeof avg !== 'number' || avg <= 0 || typeof total !== 'number' || total <= 0) return;
-
-  const ratingText = avg.toFixed(1);
-  const reviewCountText = total.toLocaleString();
-
-  const html = `${renderStars(avg)} ${ratingText} (${reviewCountText} reviews)`;
+  if(!node || !avg || !total) return;
+  const html = `${renderStars(avg)} ${avg.toFixed(1)} (${total.toLocaleString()} reviews)`;
   let ratingDiv = node.querySelector('.google-rating');
   if (!ratingDiv) {
       ratingDiv = document.createElement('div');
       ratingDiv.className = 'google-rating';
-      ratingDiv.style.marginTop = '4px';
-      ratingDiv.style.fontSize = '0.85em';
-      const myRatingContainer = node.querySelector('.my-rating-container');
-      node.insertBefore(ratingDiv, myRatingContainer);
+      ratingDiv.style.cssText = 'margin-top: 4px; font-size: 0.85em;';
+      node.insertBefore(ratingDiv, node.querySelector('.my-rating-container'));
   }
   ratingDiv.innerHTML = html;
 }
 
 /********************************************************************
- *  Personal Ratings & Notes - Saved to Browser's localStorage    *
+ *  Personal Data & Actions (Ratings, Notes, Deleting)             *
  ********************************************************************/
 const USER_DATA_KEY = 'myChelseaRestaurantData';
 
@@ -330,15 +301,30 @@ function saveUserData(allData) {
     localStorage.setItem(USER_DATA_KEY, JSON.stringify(allData));
 }
 
-function setStars(starContainer, rating) {
-    starContainer.querySelectorAll('.my-star').forEach(star => {
-        const starValue = parseInt(star.dataset.value, 10);
-        star.classList.toggle('filled', starValue <= rating);
-        star.innerHTML = starValue <= rating ? '★' : '☆';
-    });
+function handleDeletePlace(event) {
+    const idxToDelete = event.target.dataset.idx;
+    const cardElement = document.getElementById(`card${idxToDelete}`);
+    const placeName = cardElement.querySelector('.restLink').textContent;
+
+    if (confirm(`Are you sure you want to delete "${placeName}"?`)) {
+        // Remove from main data array
+        const dataIndex = data.findIndex(item => item.idx == idxToDelete);
+        if (dataIndex > -1) {
+            data.splice(dataIndex, 1);
+        }
+
+        // Remove from localStorage
+        const userData = loadUserData();
+        delete userData[idxToDelete];
+        saveUserData(userData);
+        
+        // Remove from DOM
+        cardElement.remove();
+    }
 }
 
-function attachPersonalActionListeners(cardNode) {
+function attachAllActionListeners(cardNode) {
+    // Attach Rating Listeners
     const starContainer = cardNode.querySelector('.my-rating-stars');
     if(starContainer) {
         starContainer.addEventListener('mouseover', e => {
@@ -346,120 +332,171 @@ function attachPersonalActionListeners(cardNode) {
             if (!hoverValue) return;
             starContainer.querySelectorAll('.my-star').forEach(s => {
                 const starValue = parseInt(s.dataset.value, 10);
-                s.classList.toggle('hover', starValue <= hoverValue);
                 s.innerHTML = starValue <= hoverValue ? '★' : '☆';
+                s.classList.toggle('hover', starValue <= hoverValue);
             });
         });
         starContainer.addEventListener('mouseout', () => {
             const userData = loadUserData();
             const savedRating = userData[starContainer.dataset.idx]?.rating || 0;
-            setStars(starContainer, savedRating);
+            const stars = starContainer.querySelectorAll('.my-star');
+            stars.forEach(s => {
+                s.innerHTML = parseInt(s.dataset.value) <= savedRating ? '★' : '☆';
+                s.classList.remove('hover');
+                s.classList.toggle('filled', parseInt(s.dataset.value) <= savedRating);
+            });
         });
         starContainer.addEventListener('click', e => {
             const rating = parseInt(e.target.dataset.value, 10);
             if (!rating) return;
             const idx = starContainer.dataset.idx;
-            const userData = loadUserData();
+            let userData = loadUserData();
             if (!userData[idx]) userData[idx] = {};
             userData[idx].rating = userData[idx].rating === rating ? 0 : rating;
             saveUserData(userData);
-            setStars(starContainer, userData[idx].rating);
+            starContainer.dispatchEvent(new Event('mouseout')); // Trigger mouseout to redraw stars correctly
         });
     }
 
+    // Attach Notes Listener
     const notesField = cardNode.querySelector('.my-notes');
     if(notesField) {
         notesField.addEventListener('blur', () => {
             const idx = notesField.dataset.idx;
-            const userData = loadUserData();
+            let userData = loadUserData();
             if (!userData[idx]) userData[idx] = {};
             userData[idx].notes = notesField.innerText.trim();
             saveUserData(userData);
         });
+    }
+    
+    // Attach Delete Listener
+    const deleteBtn = cardNode.querySelector('.delete-btn');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', handleDeletePlace);
     }
 }
 
 function applyAllUserData() {
     const userData = loadUserData();
     Object.keys(userData).forEach(idx => {
+        const cardNode = document.getElementById(`card${idx}`);
+        if (!cardNode) return;
+        
         const itemData = userData[idx];
         if (itemData.rating) {
-            const starContainer = document.querySelector(`.my-rating-stars[data-idx="${idx}"]`);
-            if (starContainer) setStars(starContainer, itemData.rating);
+            const starContainer = cardNode.querySelector('.my-rating-stars');
+            if(starContainer) {
+                const stars = starContainer.querySelectorAll('.my-star');
+                stars.forEach(s => {
+                    s.innerHTML = parseInt(s.dataset.value) <= itemData.rating ? '★' : '☆';
+                    s.classList.toggle('filled', parseInt(s.dataset.value) <= itemData.rating);
+                });
+            }
         }
         if (itemData.notes) {
-            const notesField = document.querySelector(`.my-notes[data-idx="${idx}"]`);
+            const notesField = cardNode.querySelector('.my-notes');
             if (notesField) notesField.innerText = itemData.notes;
         }
     });
 }
 
 /********************************************************************
- *  Add New Place - Dynamic Form & Google Places API Search         *
+ *  Add New Place & Auto-Find Dish                                  *
  ********************************************************************/
+function extractMustOrder(reviews) {
+    if (!reviews || reviews.length === 0) return 'Must-order: TBD';
+    const keywords = ['must order','must try','must-try','must have','get the','order the','loved the','favorite was the','recommend the',"don't miss the"];
+    for (const review of reviews) {
+        const reviewText = review.text.toLowerCase();
+        for (const keyword of keywords) {
+            const keywordIndex = reviewText.indexOf(keyword);
+            if (keywordIndex !== -1) {
+                const snippetStartIndex = keywordIndex + keyword.length;
+                let snippet = review.text.substring(snippetStartIndex).trim();
+                if (snippet.startsWith(':')) snippet = snippet.substring(1).trim();
+                const terminators = ['.', '!', ',', ' and ', ' but ', ' which', ' it was', '\n'];
+                let endIndex = -1;
+                terminators.forEach(term => {
+                    const termIndex = snippet.indexOf(term);
+                    if (termIndex !== -1 && (endIndex === -1 || termIndex < endIndex)) endIndex = termIndex;
+                });
+                let dish = (endIndex !== -1 ? snippet.substring(0, endIndex) : snippet.split(' ').slice(0, 5).join(' ')).trim();
+                if (dish && dish.length > 2 && dish.length < 50) {
+                    const formattedDish = dish.charAt(0).toUpperCase() + dish.slice(1);
+                    return `Must-order: ${formattedDish}`;
+                }
+            }
+        }
+    }
+    return 'Must-order: TBD';
+}
+
 function handleAddPlace(event) {
     event.preventDefault();
     const nameInput = document.getElementById('newPlaceName');
     const categorySelect = document.getElementById('newPlaceCategory');
     const placeName = nameInput.value.trim();
-    const category = categorySelect.value;
+    if (!placeName) { alert("Please enter a name for the place."); return; }
 
-    if (!placeName) {
-        alert("Please enter a name for the place.");
-        return;
-    }
-
-    const request = {
+    const searchRequest = {
         query: placeName + ", New York, NY",
-        fields: ['name', 'rating', 'user_ratings_total', 'place_id', 'geometry', 'price_level', 'types', 'url'],
+        fields: ['place_id', 'name', 'geometry', 'price_level', 'types', 'url'],
         locationBias: new google.maps.LatLng(HOME.lat, HOME.lon)
     };
 
-    gService.textSearch(request, (results, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
-            const place = results[0];
+    gService.textSearch(searchRequest, (results, status) => {
+        if (status !== google.maps.places.PlacesServiceStatus.OK || !results || !results[0]) {
+            alert(`Could not find a place named "${placeName}". Please try a more specific name.`);
+            return;
+        }
+        const place = results[0];
+        
+        // Now get details including reviews to find the dish
+        const detailsRequest = {
+            placeId: place.place_id,
+            fields: ['review', 'rating', 'user_ratings_total'] // 'review' is correct field name
+        };
+        
+        gService.getDetails(detailsRequest, (details, detailsStatus) => {
+            if (detailsStatus !== google.maps.places.PlacesServiceStatus.OK) {
+                console.error("Failed to get place details:", detailsStatus);
+                // Even if details fail, add the place with basic info
+                details = {}; // create empty object to avoid errors
+            }
+
             const newIndex = data.length > 0 ? Math.max(...data.map(d => d.idx)) + 1 : 1;
-            
             const newPlace = {
                 idx: newIndex,
                 name: place.name,
                 lat: place.geometry.location.lat(),
                 lon: place.geometry.location.lng(),
-                cat: category,
+                cat: categorySelect.value,
                 price: place.price_level ? '$'.repeat(place.price_level) : '$$',
                 cuisine: place.types[0] ? place.types[0].replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'N/A',
                 url: place.url,
                 blurb: `Added on ${new Date().toLocaleDateString()}`,
-                dish: 'Must-order: TBD',
-                rating: place.rating,
-                reviews: place.user_ratings_total,
+                dish: extractMustOrder(details.reviews),
+                rating: details.rating,
+                reviews: details.user_ratings_total,
                 placeId: place.place_id
             };
             
             data.push(newPlace);
-            
-            const container = document.getElementById(`cards-container-${category}`);
+            const container = document.getElementById(`cards-container-${newPlace.cat}`);
             container.insertAdjacentHTML('beforeend', cardHTML(newPlace));
-            
             const newCardNode = document.getElementById(`card${newIndex}`);
-            attachPersonalActionListeners(newCardNode);
-            applyAllUserData(); // Re-apply to ensure saved data is visible if it exists
-            
+            attachAllActionListeners(newCardNode);
             if (newPlace.rating) {
                 injectRating(`card${newIndex}`, newPlace.rating, newPlace.reviews);
             }
-            
             nameInput.value = '';
             newCardNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-        } else {
-            alert(`Could not find a place named "${placeName}". Please try a more specific name.`);
-        }
+        });
     });
 }
 
-
-// --- GOOGLE PLACES API INITIALIZATION ---
+// --- GOOGLE PLACES API & INITIAL SETUP ---
 let gService;
 try {
     gService = new google.maps.places.PlacesService(document.createElement('div'));
@@ -468,25 +505,26 @@ try {
     return;
 }
 
+// Fetch initial ratings
 data.forEach(r => {
-    if (r.placeId || !r.name) return; // Skip if it has a placeId or no name
+    if (r.placeId || !r.name) return;
     const request = {
         query: r.name + ", New York, NY",
-        fields: ['name', 'rating', 'user_ratings_total', 'place_id'],
+        fields: ['rating', 'user_ratings_total', 'place_id'],
         locationBias: new google.maps.LatLng(r.lat, r.lon)
     };
     gService.textSearch(request, (results, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
-            r.rating = results[0].rating;
-            r.reviews = results[0].user_ratings_total;
-            if (r.rating) injectRating("card" + r.idx, r.rating, r.reviews);
+            if (results[0].rating) {
+                injectRating("card" + r.idx, results[0].rating, results[0].user_ratings_total);
+            }
         }
     });
 });
 
-// --- ATTACH LISTENERS ---
+// Attach all listeners to initial cards
+document.querySelectorAll('.card').forEach(card => attachAllActionListeners(card));
 applyAllUserData();
-document.querySelectorAll('.card').forEach(card => attachPersonalActionListeners(card));
 document.getElementById('addPlaceForm').addEventListener('submit', handleAddPlace);
 document.getElementById("catFilter").dispatchEvent(new Event('change'));
 
