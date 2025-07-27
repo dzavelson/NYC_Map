@@ -202,6 +202,7 @@ function renderAllCards() {
     list.innerHTML = ''; // Clear container before rendering
     Object.keys(CATEGORIES).forEach(cat=>{
         const categoryData = data.filter(d => d.cat === cat);
+        // Only render the category heading if it has items
         if (categoryData.length > 0) {
             list.insertAdjacentHTML("beforeend", `<h2 id="heading-${cat}">${CATEGORIES[cat]}</h2>`);
             const categoryCardContainer = document.createElement('div');
@@ -218,7 +219,7 @@ function renderAllCards() {
 }
 
 document.getElementById("catFilter").addEventListener("change",()=>{
-    const sel=document.getElementById("catFilter").value;
+    const sel = document.getElementById("catFilter").value;
     document.querySelectorAll('.card').forEach(card => {
         const cardCategory = Array.from(card.classList).find(c => CATEGORIES[c]);
         card.style.display = (sel === 'all' || cardCategory === sel) ? "block" : "none";
@@ -318,9 +319,10 @@ function handleAddPlace(event) {
     }, (results, status) => {
         if (status !== 'OK' || !results || !results[0]) { alert(`Could not find "${placeName}". Please try a more specific name.`); return; }
         
+        // ** THE FIX IS HERE: Requesting the correct 'website' field **
         gService.getDetails({
             placeId: results[0].place_id,
-            fields: ['name', 'url', 'website_uri', 'geometry', 'price_level', 'types', 'rating', 'user_ratings_total', 'reviews']
+            fields: ['name', 'url', 'website', 'geometry', 'price_level', 'types', 'rating', 'user_ratings_total', 'reviews']
         }, (place, detailsStatus) => {
             if (detailsStatus !== 'OK') { alert("Could not fetch details for that place."); return; }
             
@@ -330,11 +332,14 @@ function handleAddPlace(event) {
                 idx: newIndex, name: place.name, cat: selectedCategory,
                 price: place.price_level ? '$'.repeat(place.price_level) : '$$',
                 cuisine: place.types && place.types[0] ? place.types[0].replace(/_/g, ' ').replace(/\b\w/g, l=>l.toUpperCase()) : 'N/A',
-                url: place.website_uri || place.url, 
+                url: place.website || place.url, // Prefer the official website URL if it exists
                 blurb: `Added by you on ${new Date().toLocaleDateString()}`,
                 dish: extractMustOrder(place.reviews), 
                 placeId: place.place_id, 
-                isUserAdded: true
+                isUserAdded: true,
+                // Also save rating info so we don't need to re-fetch it
+                rating: place.rating,
+                reviews: place.user_ratings_total
             };
             
             data.push(newPlace);
@@ -344,19 +349,22 @@ function handleAddPlace(event) {
             
             let container = document.getElementById(`cards-container-${newPlace.cat}`);
             let heading = document.getElementById(`heading-${newPlace.cat}`);
-            if (!container) {
-                list.insertAdjacentHTML("beforeend", `<h2 id="heading-${newPlace.cat}">${CATEGORIES[newPlace.cat]}</h2>`);
-                container = document.createElement('div');
-                container.id = `cards-container-${newPlace.cat}`;
-                list.appendChild(container);
-            } else if (heading.style.display === 'none') {
-                heading.style.display = 'block';
+            if (!container) { // If category doesn't exist on page yet, create it
+                renderAllCards(); // Easiest way to add the new heading and container correctly
+                container = document.getElementById(`cards-container-${newPlace.cat}`);
+            } else {
+                 container.insertAdjacentHTML('beforeend', cardHTML(newPlace));
             }
 
-            container.insertAdjacentHTML('beforeend', cardHTML(newPlace));
+            if(heading && heading.style.display === 'none') {
+                 heading.style.display = 'block';
+            }
+
             const newCardNode = document.getElementById(`card${newIndex}`);
             attachAllActionListeners(newCardNode);
-            if (place.rating) injectRating(`card${newIndex}`, place.rating, place.user_ratings_total);
+            if (newPlace.rating) {
+                injectRating(`card${newIndex}`, newPlace.rating, newPlace.reviews);
+            }
             applyAllUserData();
             nameInput.value = '';
             newCardNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -366,6 +374,7 @@ function handleAddPlace(event) {
 
 function attachAllActionListeners(cardNode) {
     cardNode.querySelector('.delete-btn')?.addEventListener('click', handleDeletePlace);
+    
     const starContainer = cardNode.querySelector('.my-rating-stars');
     if (starContainer) {
         starContainer.addEventListener('mouseover', e => {
@@ -373,14 +382,13 @@ function attachAllActionListeners(cardNode) {
             if (!hoverValue) return;
             starContainer.querySelectorAll('.my-star').forEach(s => {
                 s.innerHTML = parseInt(s.dataset.value) <= hoverValue ? '★' : '☆';
-                s.classList.toggle('hover', true);
+                s.classList.add('hover');
             });
         });
         starContainer.addEventListener('mouseout', () => {
             const userData = JSON.parse(localStorage.getItem(USER_DATA_KEY) || '{}');
             const savedRating = userData[starContainer.dataset.idx]?.rating || 0;
-            const stars = starContainer.querySelectorAll('.my-star');
-            stars.forEach(s => {
+            starContainer.querySelectorAll('.my-star').forEach(s => {
                 s.innerHTML = parseInt(s.dataset.value) <= savedRating ? '★' : '☆';
                 s.classList.remove('hover');
                 s.classList.toggle('filled', parseInt(s.dataset.value) <= savedRating);
@@ -432,17 +440,16 @@ function applyAllUserData() {
 // --- INITIALIZATION ---
 renderAllCards();
 data.forEach(r => {
-    if (r.placeId && r.isUserAdded) {
-         if (r.rating) {
-            injectRating(`card${r.idx}`, r.rating, r.reviews);
-        }
-    } else if (!r.isUserAdded) {
+    // Fetch ratings only for the base data. User-added places have ratings saved.
+    if (!r.isUserAdded) {
          gService.textSearch({ query: `${r.name}, New York, NY`, fields: ['rating', 'user_ratings_total'] },
          (results, status) => {
              if (status === 'OK' && results && results[0] && results[0].rating) {
                  injectRating(`card${r.idx}`, results[0].rating, results[0].user_ratings_total);
              }
          });
+    } else if (r.rating) { // For user-added places that already have rating data.
+        injectRating(`card${r.idx}`, r.rating, r.reviews);
     }
 });
 document.getElementById('addPlaceForm').addEventListener('submit', handleAddPlace);
@@ -455,4 +462,4 @@ document.getElementById("catFilter").dispatchEvent(new Event('change'));
 <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAKPWb_1blb8G_kwcJfQ2AVu0VvLYiTviM&libraries=places&callback=initPage"></script>
 
 </body>
-</html>```
+</html>
